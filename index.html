@@ -435,10 +435,12 @@
         #celebration-page.video-mode .room-lighting-video { opacity: 1; }
         #celebration-page.video-mode .room-scene,
         #celebration-page.video-mode .fairy-lights-container { display: none; }
+        /* Keep the celebration controls visible while the video loads.  This
+           also gives a graceful fallback if a host has not served the video. */
         #celebration-page.video-playing .celebration-content {
-            opacity: 0;
-            pointer-events: none;
-            transform: scale(.96);
+            opacity: 1;
+            pointer-events: auto;
+            transform: none;
         }
 
         .room-scene::before {
