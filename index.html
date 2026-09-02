@@ -1740,9 +1740,9 @@
             </svg>
         </div>
         <div class="celebration-content">
-            <h2 id="celeb-hint" style="font-size: 1.5rem; margin-bottom: 30px; letter-spacing: 2px;">A Little Birthday Magic Is Loading...
+            <h2 id="celeb-hint" style="font-size: 1.5rem; margin-bottom: 30px; letter-spacing: 2px;">The Stage is Set...
             </h2>
-            <button id="celeb-master-btn" class="btn-neon" onclick="celebFlow()">✨ Prepare the Surprise</button>
+            <button id="celeb-master-btn" class="btn-neon" onclick="celebFlow()">💡 Turn On Lights</button>
         </div>
     </section>
 
@@ -1944,6 +1944,29 @@
         }
 
         Object.entries(hostedImageAssets).forEach(([localPath, remotePath]) => loadHostedImage(localPath, remotePath));
+
+        // The lighting video is also stored in safe-sized GitHub files and is
+        // rebuilt before the "Turn On Lights" moment.
+        async function loadHostedLightingVideo() {
+            const video = document.getElementById('room-lighting-video');
+            const parts = Array.from({ length: 4 }, (_, index) => `media/light-video.part${String(index + 1).padStart(2, '0')}.txt`);
+            try {
+                const encodedParts = await Promise.all(parts.map(async (path) => {
+                    const response = await fetch(path, { cache: 'force-cache' });
+                    if (!response.ok) throw new Error(`Video part unavailable: ${path}`);
+                    return (await response.text()).trim();
+                }));
+                const binary = atob(encodedParts.join(''));
+                const bytes = new Uint8Array(binary.length);
+                for (let index = 0; index < binary.length; index += 1) bytes[index] = binary.charCodeAt(index);
+                video.src = URL.createObjectURL(new Blob([bytes], { type: 'video/mp4' }));
+                video.load();
+            } catch (error) {
+                // The local <source> remains available during development.
+            }
+        }
+
+        loadHostedLightingVideo();
 
         function startInstrumentalMusic() {
             const audio = document.getElementById('instrumental-audio');
@@ -2520,12 +2543,9 @@
             await fadeOutInstrumentalMusic();
             transitionTo('celebration-page');
             const btn = document.getElementById('celeb-master-btn');
-            const hint = document.getElementById('celeb-hint');
             btn.disabled = true;
             btn.style.opacity = '0.65';
             btn.style.cursor = 'wait';
-            btn.innerText = '✨ Preparing Your Surprise...';
-            hint.innerText = 'A little birthday magic is loading...';
             await runRoomLightingSequence();
             btn.disabled = false;
             btn.style.opacity = '1';
