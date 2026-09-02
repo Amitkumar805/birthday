@@ -1740,9 +1740,9 @@
             </svg>
         </div>
         <div class="celebration-content">
-            <h2 id="celeb-hint" style="font-size: 1.5rem; margin-bottom: 30px; letter-spacing: 2px;">The Stage is Set...
+            <h2 id="celeb-hint" style="font-size: 1.5rem; margin-bottom: 30px; letter-spacing: 2px;">A Little Birthday Magic Is Loading...
             </h2>
-            <button id="celeb-master-btn" class="btn-neon" onclick="celebFlow()">💡 Turn On Lights</button>
+            <button id="celeb-master-btn" class="btn-neon" onclick="celebFlow()">✨ Prepare the Surprise</button>
         </div>
     </section>
 
@@ -2520,9 +2520,12 @@
             await fadeOutInstrumentalMusic();
             transitionTo('celebration-page');
             const btn = document.getElementById('celeb-master-btn');
+            const hint = document.getElementById('celeb-hint');
             btn.disabled = true;
             btn.style.opacity = '0.65';
             btn.style.cursor = 'wait';
+            btn.innerText = '✨ Preparing Your Surprise...';
+            hint.innerText = 'A little birthday magic is loading...';
             await runRoomLightingSequence();
             btn.disabled = false;
             btn.style.opacity = '1';
