@@ -1878,6 +1878,34 @@
         let instrumentalStarting = false;
         let instrumentalSequenceFinished = false;
 
+        // GitHub Pages serves the two large MP3 files in small pieces.  They
+        // are joined back into a normal audio Blob here.  When opening this
+        // project locally, the original files remain the fallback sources.
+        const hostedAudioParts = {
+            'instrumental-audio': Array.from({ length: 3 }, (_, index) => `media/birthday-instrumental.part${String(index + 1).padStart(2, '0')}.txt`),
+            'birthday-audio': Array.from({ length: 15 }, (_, index) => `media/khuda-bhi-2.part${String(index + 1).padStart(2, '0')}.txt`)
+        };
+
+        async function loadHostedAudio(audioId, parts) {
+            const audio = document.getElementById(audioId);
+            try {
+                const encodedParts = await Promise.all(parts.map(async (path) => {
+                    const response = await fetch(path, { cache: 'force-cache' });
+                    if (!response.ok) throw new Error(`Audio part unavailable: ${path}`);
+                    return (await response.text()).trim();
+                }));
+                const binary = atob(encodedParts.join(''));
+                const bytes = new Uint8Array(binary.length);
+                for (let index = 0; index < binary.length; index += 1) bytes[index] = binary.charCodeAt(index);
+                audio.src = URL.createObjectURL(new Blob([bytes], { type: 'audio/mpeg' }));
+                audio.load();
+            } catch (error) {
+                // Local development uses the <source> files above instead.
+            }
+        }
+
+        Object.entries(hostedAudioParts).forEach(([audioId, parts]) => loadHostedAudio(audioId, parts));
+
         function startInstrumentalMusic() {
             const audio = document.getElementById('instrumental-audio');
             if (instrumentalSequenceFinished || instrumentalPlaying || instrumentalStarting) return;
