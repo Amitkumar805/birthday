@@ -1906,6 +1906,45 @@
 
         Object.entries(hostedAudioParts).forEach(([audioId, parts]) => loadHostedAudio(audioId, parts));
 
+        // Optimized image copies are stored as base64 files for GitHub Pages.
+        // The original image paths continue to work when the project is opened
+        // locally, while the hosted version swaps them in automatically.
+        const hostedImageAssets = {
+            'assets/images/memory-1.png': 'media/images/memory-1.jpg.txt',
+            'assets/images/mannat-1.png': 'media/images/mannat-1.jpg.txt',
+            'assets/images/memory-3.png': 'media/images/memory-3.jpg.txt',
+            'assets/images/memory-4.png': 'media/images/memory-4.jpg.txt',
+            'assets/images/memory-5.png': 'media/images/memory-5.jpg.txt',
+            'assets/images/memory-6.png': 'media/images/memory-6.jpg.txt',
+            'assets/images/pink-rose-corner.png': 'media/images/pink-rose-corner.jpg.txt',
+            'assets/images/slider-night-sky.png': 'media/images/slider-night-sky.jpg.txt',
+            'assets/images/mauntan_1.png': 'media/images/mauntan_1.jpg.txt'
+        };
+
+        async function loadHostedImage(localPath, remotePath) {
+            try {
+                const response = await fetch(remotePath, { cache: 'force-cache' });
+                if (!response.ok) throw new Error(`Image unavailable: ${remotePath}`);
+                const encoded = (await response.text()).trim();
+                const binary = atob(encoded);
+                const bytes = new Uint8Array(binary.length);
+                for (let index = 0; index < binary.length; index += 1) bytes[index] = binary.charCodeAt(index);
+                const url = URL.createObjectURL(new Blob([bytes], { type: 'image/jpeg' }));
+
+                document.querySelectorAll(`img[src="${localPath}"]`).forEach(image => { image.src = url; });
+                if (localPath.endsWith('slider-night-sky.png')) {
+                    document.getElementById('message-slider-page').style.backgroundImage = `url("${url}")`;
+                }
+                if (localPath.endsWith('mauntan_1.png')) {
+                    document.querySelectorAll('.stage').forEach(stage => { stage.style.backgroundImage = `url("${url}")`; });
+                }
+            } catch (error) {
+                // Leave the original local image untouched if a hosted file is unavailable.
+            }
+        }
+
+        Object.entries(hostedImageAssets).forEach(([localPath, remotePath]) => loadHostedImage(localPath, remotePath));
+
         function startInstrumentalMusic() {
             const audio = document.getElementById('instrumental-audio');
             if (instrumentalSequenceFinished || instrumentalPlaying || instrumentalStarting) return;
