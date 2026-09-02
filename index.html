@@ -435,12 +435,10 @@
         #celebration-page.video-mode .room-lighting-video { opacity: 1; }
         #celebration-page.video-mode .room-scene,
         #celebration-page.video-mode .fairy-lights-container { display: none; }
-        /* Keep the celebration controls visible while the video loads.  This
-           also gives a graceful fallback if a host has not served the video. */
         #celebration-page.video-playing .celebration-content {
-            opacity: 1;
-            pointer-events: auto;
-            transform: none;
+            opacity: 0;
+            pointer-events: none;
+            transform: scale(.96);
         }
 
         .room-scene::before {
@@ -2548,15 +2546,11 @@
             await fadeOutInstrumentalMusic();
             transitionTo('celebration-page');
             const btn = document.getElementById('celeb-master-btn');
-            btn.disabled = true;
-            btn.style.opacity = '0.65';
-            btn.style.cursor = 'wait';
-            await runRoomLightingSequence();
-            btn.disabled = false;
             btn.style.opacity = '1';
             btn.style.cursor = 'pointer';
-            btn.innerText = '🎵 Play Music';
-            celebStep = 2;
+            btn.disabled = false;
+            btn.innerText = '💡 Turn On Lights';
+            celebStep = 1;
         }
 
         // --- Celebration Flow ---
